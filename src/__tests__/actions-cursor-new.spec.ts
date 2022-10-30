@@ -37,4 +37,24 @@ describe('Code Editor Shortcuts: actions - single cursor selection', () => {
     view.setState(initialState);
     view.dispatch({ selection: EditorSelection.create([initialSelection]) });
   });
+
+  describe('insertLineAbove', () => {
+    it('should insert line above', () => {
+      withMultipleSelectionsNew(view as any, insertLineAbove);
+
+      const { doc, cursor } = getDocumentAndSelection(view as any);
+      expect(doc).toEqual('lorem ipsum\n\ndolor sit\namet');
+      expect(cursor.line).toEqual(1);
+    });
+
+    it('should insert line above first line', () => {
+      view.setCursor({ line: 0, ch: 0 });
+
+      withMultipleSelectionsNew(view as any, insertLineAbove);
+
+      const { doc, cursor } = getDocumentAndSelection(view as any);
+      expect(doc).toEqual('\nlorem ipsum\ndolor sit\namet');
+      expect(cursor.line).toEqual(0);
+    });
+  });
 });

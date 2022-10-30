@@ -1,11 +1,21 @@
 import {
   Editor,
+  EditorChange,
+  EditorRangeOrCaret,
   EditorPosition,
   EditorSelection,
   EditorSelectionOrCaret,
 } from 'obsidian';
 import { DIRECTION } from './constants';
-import { CustomSelectionHandler } from './custom-selection-handlers';
+import {
+  CustomSelectionHandler,
+  CustomSelectionHandlerNew,
+} from './custom-selection-handlers';
+
+type EditorActionCallbackNew = (
+  selection: EditorSelection,
+  args: any,
+) => { changes: EditorChange[]; newSelection: EditorRangeOrCaret };
 
 type EditorActionCallback = (
   editor: Editor,
@@ -24,7 +34,74 @@ type MultipleSelectionOptions = {
   repeatSameLineActions?: boolean;
 };
 
+export type EditorActionCallbackNewArgs = Record<string, any>;
+
+type MultipleSelectionOptionsNew = {
+  // Additional information to be passed to the EditorActionCallback
+  args?: EditorActionCallbackNewArgs;
+
+  // Perform further processing of new selections before they are set
+  customSelectionHandler?: CustomSelectionHandlerNew;
+
+  // Whether the action should be repeated for cursors on the same line
+  repeatSameLineActions?: boolean;
+};
+
 export const defaultMultipleSelectionOptions = { repeatSameLineActions: true };
+
+export const withMultipleSelectionsNew = (
+  editor: Editor,
+  callback: EditorActionCallbackNew,
+  options: MultipleSelectionOptionsNew = defaultMultipleSelectionOptions,
+) => {
+  const selections = editor.listSelections();
+  let selectionIndexesToProcess: number[];
+  let newSelections: EditorRangeOrCaret[] = [];
+  const changes: EditorChange[] = [];
+
+  if (!options.repeatSameLineActions) {
+    const seenLines: number[] = [];
+    selectionIndexesToProcess = selections.reduce(
+      (indexes, currSelection, currIndex) => {
+        const currentLine = currSelection.head.line;
+        if (!seenLines.includes(currentLine)) {
+          seenLines.push(currentLine);
+          indexes.push(currIndex);
+        }
+        return indexes;
+      },
+      [],
+    );
+  }
+
+  for (let i = 0; i < selections.length; i++) {
+    // Controlled by repeatSameLineActions
+    if (selectionIndexesToProcess && !selectionIndexesToProcess.includes(i)) {
+      continue;
+    }
+
+    // Can't reuse selections variable as positions may change on each iteration
+    const selection = editor.listSelections()[i];
+
+    // Selections may disappear (e.g. running delete line for two cursors on the same line)
+    if (selection) {
+      const { changes: newChanges, newSelection } = callback(selection, {
+        ...options.args,
+        iteration: i,
+      });
+      changes.push(...newChanges);
+      newSelections.push(newSelection);
+    }
+  }
+
+  if (options.customSelectionHandler) {
+    newSelections = options.customSelectionHandler(newSelections);
+  }
+  editor.transaction({
+    changes,
+    selections: newSelections,
+  });
+};
 
 export const withMultipleSelections = (
   editor: Editor,

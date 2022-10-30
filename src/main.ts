@@ -27,6 +27,7 @@ import {
   defaultMultipleSelectionOptions,
   iterateCodeMirrorDivs,
   withMultipleSelections,
+  withMultipleSelectionsNew,
 } from './utils';
 import { CASE, DIRECTION, MODIFIER_KEYS } from './constants';
 import { insertLineBelowHandler } from './custom-selection-handlers';
@@ -43,7 +44,7 @@ export default class CodeEditorShortcuts extends Plugin {
         },
       ],
       editorCallback: (editor) =>
-        withMultipleSelections(editor, insertLineAbove),
+        withMultipleSelectionsNew(editor, insertLineAbove),
     });
 
     this.addCommand({
