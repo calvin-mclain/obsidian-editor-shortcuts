@@ -2,7 +2,6 @@ import CodeMirror from 'codemirror';
 import type { Editor } from 'codemirror';
 import { getDocumentAndSelection } from './test-helpers';
 import {
-  insertLineBelow,
   deleteSelectedLines,
   deleteToStartOfLine,
   deleteToEndOfLine,
@@ -55,38 +54,6 @@ describe('Code Editor Shortcuts: actions - single cursor selection', () => {
   beforeEach(() => {
     editor.setValue(originalDoc);
     editor.setCursor({ line: 1, ch: 0 });
-  });
-
-  describe('insertLineBelow', () => {
-    it('should insert line below', () => {
-      withMultipleSelections(editor as any, insertLineBelow);
-
-      const { doc, cursor } = getDocumentAndSelection(editor);
-      expect(doc).toEqual('lorem ipsum\ndolor sit\n\namet');
-      expect(cursor.line).toEqual(2);
-    });
-
-    it('should insert line below with the same indentation level', () => {
-      editor.setValue('    lorem ipsum\n    dolor sit\n    amet');
-      editor.setCursor({ line: 1, ch: 0 });
-
-      withMultipleSelections(editor as any, insertLineBelow);
-
-      const { doc, cursor } = getDocumentAndSelection(editor);
-      expect(doc).toEqual('    lorem ipsum\n    dolor sit\n    \n    amet');
-      expect(cursor.line).toEqual(2);
-      expect(cursor.ch).toEqual(4);
-    });
-
-    it('should insert line below last line', () => {
-      editor.setCursor({ line: 2, ch: 0 });
-
-      withMultipleSelections(editor as any, insertLineBelow);
-
-      const { doc, cursor } = getDocumentAndSelection(editor);
-      expect(doc).toEqual('lorem ipsum\ndolor sit\namet\n');
-      expect(cursor.line).toEqual(3);
-    });
   });
 
   describe('deleteSelectedLines', () => {

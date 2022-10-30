@@ -10,7 +10,7 @@ import {
   getDocumentAndSelection,
   posToOffset,
 } from './test-helpers';
-import { insertLineAbove } from '../actions';
+import { insertLineAbove, insertLineBelow } from '../actions';
 import { withMultipleSelectionsNew } from '../utils';
 
 describe('Code Editor Shortcuts: actions - single cursor selection', () => {
@@ -55,6 +55,40 @@ describe('Code Editor Shortcuts: actions - single cursor selection', () => {
       const { doc, cursor } = getDocumentAndSelection(view as any);
       expect(doc).toEqual('\nlorem ipsum\ndolor sit\namet');
       expect(cursor.line).toEqual(0);
+    });
+  });
+
+  describe('insertLineBelow', () => {
+    it('should insert line below', () => {
+      withMultipleSelectionsNew(view as any, insertLineBelow);
+
+      const { doc, cursor } = getDocumentAndSelection(view as any);
+      expect(doc).toEqual('lorem ipsum\ndolor sit\n\namet');
+      expect(cursor.line).toEqual(2);
+    });
+
+    it('should insert line below with the same indentation level', () => {
+      view.setState(
+        EditorState.create({ doc: '    lorem ipsum\n    dolor sit\n    amet' }),
+      );
+      view.setCursor({ line: 1, ch: 0 });
+
+      withMultipleSelectionsNew(view as any, insertLineBelow);
+
+      const { doc, cursor } = getDocumentAndSelection(view as any);
+      expect(doc).toEqual('    lorem ipsum\n    dolor sit\n    \n    amet');
+      expect(cursor.line).toEqual(2);
+      expect(cursor.ch).toEqual(4);
+    });
+
+    it('should insert line below last line', () => {
+      view.setCursor({ line: 2, ch: 0 });
+
+      withMultipleSelectionsNew(view as any, insertLineBelow);
+
+      const { doc, cursor } = getDocumentAndSelection(view as any);
+      expect(doc).toEqual('lorem ipsum\ndolor sit\namet\n');
+      expect(cursor.line).toEqual(3);
     });
   });
 });

@@ -19,6 +19,7 @@ export const getDocumentAndSelection = (editor: Editor) => {
 
 export interface EditorViewWithLegacyMethods extends EditorView {
   getValue?: () => string;
+  getLine?: (n: number) => string;
   getCursor?: () => EditorPosition;
   setCursor?: (pos: EditorPosition) => void;
   getSelection?: () => string;
@@ -48,6 +49,8 @@ export const defineLegacyEditorMethods = (
   view: EditorViewWithLegacyMethods,
 ) => {
   view.getValue = () => view.state.doc.toString();
+
+  view.getLine = (n: number) => view.state.doc.line(n + 1).text;
 
   view.getCursor = () =>
     offsetToPos(view.state.doc, view.state.selection.main.head);

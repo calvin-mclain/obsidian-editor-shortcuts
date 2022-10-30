@@ -7,12 +7,10 @@ import {
   EditorSelectionOrCaret,
 } from 'obsidian';
 import { DIRECTION } from './constants';
-import {
-  CustomSelectionHandler,
-  CustomSelectionHandlerNew,
-} from './custom-selection-handlers';
+import { CustomSelectionHandler } from './custom-selection-handlers';
 
 type EditorActionCallbackNew = (
+  editor: Editor,
   selection: EditorSelection,
   args: any,
 ) => { changes: EditorChange[]; newSelection: EditorRangeOrCaret };
@@ -40,9 +38,6 @@ type MultipleSelectionOptionsNew = {
   // Additional information to be passed to the EditorActionCallback
   args?: EditorActionCallbackNewArgs;
 
-  // Perform further processing of new selections before they are set
-  customSelectionHandler?: CustomSelectionHandlerNew;
-
   // Whether the action should be repeated for cursors on the same line
   repeatSameLineActions?: boolean;
 };
@@ -56,7 +51,7 @@ export const withMultipleSelectionsNew = (
 ) => {
   const selections = editor.listSelections();
   let selectionIndexesToProcess: number[];
-  let newSelections: EditorRangeOrCaret[] = [];
+  const newSelections: EditorRangeOrCaret[] = [];
   const changes: EditorChange[] = [];
 
   if (!options.repeatSameLineActions) {
@@ -85,18 +80,19 @@ export const withMultipleSelectionsNew = (
 
     // Selections may disappear (e.g. running delete line for two cursors on the same line)
     if (selection) {
-      const { changes: newChanges, newSelection } = callback(selection, {
-        ...options.args,
-        iteration: i,
-      });
+      const { changes: newChanges, newSelection } = callback(
+        editor,
+        selection,
+        {
+          ...options.args,
+          iteration: i,
+        },
+      );
       changes.push(...newChanges);
       newSelections.push(newSelection);
     }
   }
 
-  if (options.customSelectionHandler) {
-    newSelections = options.customSelectionHandler(newSelections);
-  }
   editor.transaction({
     changes,
     selections: newSelections,

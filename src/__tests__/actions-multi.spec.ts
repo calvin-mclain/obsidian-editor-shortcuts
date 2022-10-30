@@ -3,7 +3,6 @@ import type { Editor } from 'codemirror';
 import { getDocumentAndSelection } from './test-helpers';
 import {
   insertLineAbove,
-  insertLineBelow,
   deleteSelectedLines,
   deleteToStartOfLine,
   deleteToEndOfLine,
@@ -26,7 +25,6 @@ import {
   withMultipleSelections,
   defaultMultipleSelectionOptions,
 } from '../utils';
-import { insertLineBelowHandler } from '../custom-selection-handlers';
 
 // fixes jsdom type error - https://github.com/jsdom/jsdom/issues/3002#issuecomment-655748833
 document.createRange = () => {
@@ -86,39 +84,6 @@ describe('Code Editor Shortcuts: actions - multiple mixed selections', () => {
       { anchor: { line: 4, ch: 14 }, head: { line: 4, ch: 17 } }, // a{<}dip{>}iscing
       { anchor: { line: 4, ch: 26 }, head: { line: 4, ch: 26 } }, // '{<>}elit
     ]);
-  });
-
-  describe('insertLineBelow', () => {
-    it('should insert lines below', () => {
-      withMultipleSelections(editor as any, insertLineBelow, {
-        ...defaultMultipleSelectionOptions,
-        customSelectionHandler: insertLineBelowHandler,
-      });
-
-      const { doc, selections } = getDocumentAndSelection(editor);
-      expect(doc).toEqual(
-        `lorem ipsum\n\ndolor sit\namet\n\n\n` +
-          `consectetur "adipiscing" 'elit'\n\n\n(donec [mattis])\ntincidunt metus`,
-      );
-      expect(selections).toEqual([
-        {
-          anchor: expect.objectContaining({ line: 1, ch: 0 }),
-          head: expect.objectContaining({ line: 1, ch: 0 }),
-        },
-        {
-          anchor: expect.objectContaining({ line: 4, ch: 0 }),
-          head: expect.objectContaining({ line: 4, ch: 0 }),
-        },
-        {
-          anchor: expect.objectContaining({ line: 7, ch: 0 }),
-          head: expect.objectContaining({ line: 7, ch: 0 }),
-        },
-        {
-          anchor: expect.objectContaining({ line: 8, ch: 0 }),
-          head: expect.objectContaining({ line: 8, ch: 0 }),
-        },
-      ]);
-    });
   });
 
   describe('deleteSelectedLines', () => {

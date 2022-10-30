@@ -10,7 +10,7 @@ import {
   getDocumentAndSelection,
   posToOffset,
 } from './test-helpers';
-import { insertLineAbove } from '../actions';
+import { insertLineAbove, insertLineBelow } from '../actions';
 import { withMultipleSelectionsNew } from '../utils';
 
 describe('Code Editor Shortcuts: actions - single range selection', () => {
@@ -46,6 +46,16 @@ describe('Code Editor Shortcuts: actions - single range selection', () => {
       const { doc, cursor } = getDocumentAndSelection(view as any);
       expect(doc).toEqual('lorem ipsum\n\ndolor sit\namet');
       expect(cursor.line).toEqual(1);
+    });
+  });
+
+  describe('insertLineBelow', () => {
+    it('should insert line below', () => {
+      withMultipleSelectionsNew(view as any, insertLineBelow);
+
+      const { doc, cursor } = getDocumentAndSelection(view as any);
+      expect(doc).toEqual('lorem ipsum\ndolor sit\n\namet');
+      expect(cursor.line).toEqual(2);
     });
   });
 });

@@ -10,7 +10,7 @@ import {
   getDocumentAndSelection,
   posToOffset,
 } from './test-helpers';
-import { insertLineAbove } from '../actions';
+import { insertLineAbove, insertLineBelow } from '../actions';
 import { withMultipleSelectionsNew } from '../utils';
 
 describe('Code Editor Shortcuts: actions - multiple mixed selections', () => {
@@ -76,6 +76,36 @@ describe('Code Editor Shortcuts: actions - multiple mixed selections', () => {
           head: expect.objectContaining({ line: 7, ch: 0 }),
         },
       ]);
+    });
+
+    describe('insertLineBelow', () => {
+      it('should insert lines below', () => {
+        withMultipleSelectionsNew(view as any, insertLineBelow);
+
+        const { doc, selections } = getDocumentAndSelection(view as any);
+        expect(doc).toEqual(
+          `lorem ipsum\n\ndolor sit\namet\n\n\n` +
+            `consectetur "adipiscing" 'elit'\n\n\n(donec [mattis])\ntincidunt metus`,
+        );
+        expect(selections).toEqual([
+          {
+            anchor: expect.objectContaining({ line: 1, ch: 0 }),
+            head: expect.objectContaining({ line: 1, ch: 0 }),
+          },
+          {
+            anchor: expect.objectContaining({ line: 4, ch: 0 }),
+            head: expect.objectContaining({ line: 4, ch: 0 }),
+          },
+          {
+            anchor: expect.objectContaining({ line: 7, ch: 0 }),
+            head: expect.objectContaining({ line: 7, ch: 0 }),
+          },
+          {
+            anchor: expect.objectContaining({ line: 8, ch: 0 }),
+            head: expect.objectContaining({ line: 8, ch: 0 }),
+          },
+        ]);
+      });
     });
   });
 });

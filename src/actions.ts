@@ -32,6 +32,7 @@ import {
 } from './utils';
 
 export const insertLineAbove = (
+  _: Editor,
   selection: EditorSelection,
   args: EditorActionCallbackNewArgs,
 ) => {
@@ -41,7 +42,7 @@ export const insertLineAbove = (
   const newSelection = {
     from: {
       ...startOfCurrentLine,
-      // Offset
+      // Offset by iteration
       line: startOfCurrentLine.line + args.iteration,
     },
   };
@@ -51,12 +52,28 @@ export const insertLineAbove = (
   };
 };
 
-export const insertLineBelow = (editor: Editor, selection: EditorSelection) => {
+export const insertLineBelow = (
+  editor: Editor,
+  selection: EditorSelection,
+  args: EditorActionCallbackNewArgs,
+) => {
   const { line } = selection.head;
   const endOfCurrentLine = getLineEndPos(line, editor);
   const indentation = getLeadingWhitespace(editor.getLine(line));
-  editor.replaceRange('\n' + indentation, endOfCurrentLine);
-  return { anchor: { line: line + 1, ch: indentation.length } };
+  const changes: EditorChange[] = [
+    { from: endOfCurrentLine, text: '\n' + indentation },
+  ];
+  const newSelection = {
+    from: {
+      // Offset by iteration
+      line: line + 1 + args.iteration,
+      ch: indentation.length,
+    },
+  };
+  return {
+    changes,
+    newSelection,
+  };
 };
 
 export const deleteSelectedLines = (
